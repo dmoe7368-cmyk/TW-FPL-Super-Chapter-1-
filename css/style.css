@@ -1,1 +1,513 @@
+/* ==========================================================================
+   Design Tokens & System Variables
+   ========================================================================== */
+:root {
+  /* Surface & Background */
+  --void: #0b0616;
+  --panel: #150c28;
+  --panel-2: #1c1136;
+  --panel-hover: #241745;
+  --line: #33224f;
+  --line-light: rgba(255, 255, 255, 0.08);
 
+  /* Brand Accents */
+  --gold: #e7b93f;
+  --gold-dim: #8a6e2c;
+  --gold-glow: rgba(231, 185, 63, 0.15);
+  --bronze: #cd7f32;
+  --bronze-glow: rgba(205, 127, 50, 0.15);
+  --pitch: #35c46a;
+  --purple: #8a4fe0;
+  --crest: #ff5470;
+
+  /* Feedback Colors */
+  --success: #22c55e;
+  --danger: #ef4444;
+
+  /* Typography */
+  --text: #ece6fb;
+  --text-dim: #a091c4;
+  --font-heading: 'Anton', sans-serif;
+  --font-body: 'Rajdhani', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Layout & Elevations (8px Grid & Smooth Radii) */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 18px;
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-glow: 0 0 24px rgba(138, 79, 224, 0.18);
+}
+
+/* ==========================================================================
+   Reset & Base Styles
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 900px 600px at 15% -10%, rgba(138, 79, 224, 0.22), transparent 65%),
+    radial-gradient(ellipse 700px 500px at 100% 0%, rgba(231, 185, 63, 0.12), transparent 60%),
+    var(--void);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  min-height: 100vh;
+  padding-bottom: 64px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==========================================================================
+   Header & Season Badge
+   ========================================================================== */
+header {
+  padding: 32px 16px 24px;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  overflow: hidden;
+}
+
+header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 38px,
+    rgba(255, 255, 255, 0.015) 38px,
+    rgba(255, 255, 255, 0.015) 39px
+  );
+  pointer-events: none;
+}
+
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+h1 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: clamp(30px, 8vw, 48px);
+  letter-spacing: 1px;
+  line-height: 1.05;
+  margin-top: 8px;
+  background: linear-gradient(180deg, #ffffff 20%, #c9b8ec 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.season {
+  display: inline-block;
+  margin-top: 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--void);
+  background: var(--gold);
+  padding: 4px 14px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 2px;
+  box-shadow: 0 2px 10px var(--gold-glow);
+}
+
+/* ==========================================================================
+   Navigation Tabs
+   ========================================================================== */
+nav {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 16px;
+  max-width: 900px;
+  margin: 0 auto;
+  scrollbar-width: none;
+}
+
+nav::-webkit-scrollbar {
+  display: none;
+}
+
+.navgroup {
+  display: flex;
+  gap: 8px;
+  padding-right: 12px;
+  border-right: 1px solid var(--line);
+}
+
+.navgroup:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.tab {
+  flex: 0 0 auto;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease-in-out;
+}
+
+.tab:hover {
+  color: var(--text);
+  border-color: var(--gold-dim);
+  background: var(--panel-hover);
+}
+
+.tab.active {
+  background: var(--gold);
+  border-color: var(--gold);
+  color: #1a1000;
+  font-weight: 700;
+  box-shadow: 0 4px 14px var(--gold-glow);
+}
+
+/* ==========================================================================
+   Main Layout & Headers
+   ========================================================================== */
+main {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.stagehead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 24px 4px 12px;
+  border-bottom: 1px dashed var(--line);
+  margin-bottom: 20px;
+}
+
+.stagehead h2 {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0.5px;
+  color: #ffffff;
+}
+
+.stagehead .stagesub {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   Standings Table
+   ========================================================================== */
+.table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-card);
+}
+
+.standings-table {
+  width: 100%;
+  min-width: 580px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 15px;
+}
+
+.standings-table th {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.standings-table td {
+  padding: 12px;
+  border-bottom: 1px dashed var(--line);
+  color: var(--text);
+}
+
+.standings-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.standings-table tbody tr:hover {
+  background: var(--line-light);
+}
+
+.standings-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.qualify-row {
+  border-left: 4px solid var(--gold);
+}
+
+.out-row {
+  opacity: 0.75;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.qualify-row .rank-badge {
+  background: var(--gold-glow);
+  color: var(--gold);
+}
+
+.status-tag {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--panel-2);
+  color: var(--text-dim);
+}
+
+.tag-q {
+  background: rgba(53, 196, 106, 0.15);
+  color: #7ee6a5;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Fixture Cards
+   ========================================================================== */
+.fixtures-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .fixtures-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.fx {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.fx:hover {
+  border-color: var(--gold-dim);
+  transform: translateY(-1px);
+}
+
+.fx::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--pitch);
+}
+
+.fx.knockout::before {
+  background: var(--gold);
+}
+
+.fx.bronze-fx::before {
+  background: var(--bronze);
+}
+
+.fx .side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.fx .side.away {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.fx .tname {
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fx .mid {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--gold);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ==========================================================================
+   Finals & 3rd Place Play-off
+   ========================================================================== */
+.finals-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+.final-card-section {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 20px 16px;
+  box-shadow: var(--shadow-card);
+}
+
+.final-card-section.grand-final {
+  border-color: rgba(231, 185, 63, 0.35);
+  background: linear-gradient(180deg, rgba(231, 185, 63, 0.04) 0%, var(--panel) 100%);
+}
+
+.final-card-section.third-place {
+  border-color: rgba(205, 127, 50, 0.35);
+  background: linear-gradient(180deg, rgba(205, 127, 50, 0.04) 0%, var(--panel) 100%);
+}
+
+.round-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.round-label.bronze-label {
+  color: var(--bronze);
+}
+
+.bmatch {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.bmatch .brow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bmatch .brow:last-child {
+  border-bottom: none;
+}
+
+.bmatch .brow.winner {
+  background: rgba(53, 196, 106, 0.12);
+}
+
+.bmatch .brow.winner .bname {
+  color: #7ee6a5;
+  font-weight: 700;
+}
+
+.bmatch .bname {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bmatch .bscore {
+  font-family: var(--font-mono);
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.trophy-slot {
+  text-align: center;
+  padding: 16px 8px 8px;
+}
+
+.trophy-slot .cup {
+  font-size: 32px;
+}
+
+.trophy-slot .champ {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  color: var(--gold);
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.trophy-slot .champ.bronze-champ {
+  color: var(--bronze);
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+footer {
+  text-align: center;
+  padding: 32px 16px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 1px;
+}
+
+footer span {
+  color: var(--gold);
+}
