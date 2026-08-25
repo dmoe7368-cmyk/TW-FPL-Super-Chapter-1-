@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Tie-breaker: Pts -> FPL Pts
   const sortedStandings = [...validStandings].sort((a, b) => {
     if (b.pts !== a.pts) return (b.pts || 0) - (a.pts || 0);
     return (b.fpl_pts || 0) - (a.fpl_pts || 0);
@@ -145,12 +146,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // Helper to extract valid score regardless of column shift
+  // Fallback score extractor for column shifts
   function extractScores(match) {
     let hScore = match.home_score;
     let aScore = match.away_score;
 
-    // Fallback if home_score/away_score are empty due to column shifting in sheets
     if ((hScore === "" || hScore === undefined || hScore === null) && 
         (aScore === "" || aScore === undefined || aScore === null)) {
       const keys = Object.keys(match);
@@ -293,7 +293,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const views = {
     standings: renderStandings,
     wk2: () => renderMatchView('wk2', "Week 2", "MATCH 1 · H TO H", false),
-    wk3: () => renderMatchView('wk3', "Week 3", "MATCH `2` · H TO H", false),
+    wk3: () => renderMatchView('wk3', "Week 3", "MATCH 2 · H TO H", false),
     wk4: () => renderMatchView('wk4', "Week 4", "MATCH 3 · H TO H", false),
     wk5: () => renderMatchView('wk5', "Week 5", "MATCH 4 · H TO H", false),
     r16: () => renderMatchView('r16', "Round of 16", "WEEK 6 · TOP 16 KNOCKOUT", true),
