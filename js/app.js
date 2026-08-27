@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   };
 
-  // Render Standings (Top 12)
+  // Render Standings (Top 12 Only - No OUT tags for ranks 13+)
   function renderStandings() {
     if (sortedStandings.length === 0) {
       return `
@@ -100,9 +100,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let rowsHtml = sortedStandings.map((team, i) => {
       const rank = i + 1;
-      const isQualifying = rank <= 12;
+      const isQualifying = rank <= 12; // ထိပ်ဆုံး ၁၂ သင်းသာ Qualified ဖြစ်သည်
       const rowClass = isQualifying ? 'qualify-row' : 'out-row';
-      const statusTag = isQualifying ? '<span class="status-tag tag-q">TOP 12</span>' : '<span class="status-tag">OUT</span>';
+      
+      // Top 12 အတွက်သာ TOP 12 တက်ဂ်ပြမည်၊ ကျန်အသင်းများအတွက် Status ကွက်လပ်ထားမည်
+      const statusTag = isQualifying 
+        ? '<span class="status-tag tag-q">TOP 12</span>' 
+        : ''; 
 
       return `
         <tr class="${rowClass}">
@@ -194,7 +198,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>`;
   }
 
-  // prefix ပါ ထည့်သွင်းနိုင်ရန် ပြင်ဆင်ထားသည် (ဥပမာ - M သို့မဟုတ် QM)
   function renderMatchView(stageId, title, subtitle, isKnockout, showMatchNumber = false, prefix = "M") {
     const matches = getMatches(stageId);
     if(matches.length === 0) {
@@ -299,13 +302,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     wk3: () => renderMatchView('wk3', "Week 3", "MATCH 2 · H TO H", false),
     wk4: () => renderMatchView('wk4', "Week 4", "MATCH 3 · H TO H", false),
     wk5: () => renderMatchView('wk5', "Week 5", "MATCH 4 · H TO H", false),
-    
-    // Knockout Round (12 Teams) -> M 1 to M 6
     r16: () => renderMatchView('r16', "Round of 16", "TOP 12 KNOCKOUT PLAY-OFF", true, true, "M"),
-    
-    // Quarter-Final -> QM 1 to QM 4 (ပြောင်းလဲထားသော prefix "QM")
     qf: () => renderMatchView('qf', "Quarter-Final", "8 TEAMS (6 WINNERS + 2 BEST LOSERS)", true, true, "QM"),
-    
     sf: () => renderMatchView('sf', "Semi-Final", "WEEK 8 · 4 TEAMS", true),
     final: renderFinalView
   };
