@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const matchesData = matchesResponse.data;
 
-  // Auto-calculation for Week 2 to 5
+  // Auto-calculation for League Phase
   matchesData.forEach(match => {
     const stage = match.stage ? match.stage.toString().trim().toLowerCase() : "";
     if (stage.startsWith('wk')) {
@@ -76,7 +76,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Tie-breaker: Pts -> FPL Pts
   const sortedStandings = [...validStandings].sort((a, b) => {
     if (b.pts !== a.pts) return (b.pts || 0) - (a.pts || 0);
     return (b.fpl_pts || 0) - (a.fpl_pts || 0);
@@ -89,7 +88,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   };
 
-  // Render Standings
+  // Render Standings (Top 12)
   function renderStandings() {
     if (sortedStandings.length === 0) {
       return `
@@ -101,9 +100,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let rowsHtml = sortedStandings.map((team, i) => {
       const rank = i + 1;
-      const isQualifying = rank <= 16;
+      const isQualifying = rank <= 12;
       const rowClass = isQualifying ? 'qualify-row' : 'out-row';
-      const statusTag = isQualifying ? '<span class="status-tag tag-q">TOP 16</span>' : '<span class="status-tag">OUT</span>';
+      const statusTag = isQualifying ? '<span class="status-tag tag-q">TOP 12</span>' : '<span class="status-tag">OUT</span>';
 
       return `
         <tr class="${rowClass}">
@@ -123,7 +122,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `
       <div class="stagehead">
         <h2>League Phase Standings</h2>
-        <div class="stagesub">TOP 16 ADVANCE TO KNOCKOUTS</div>
+        <div class="stagesub">TOP 12 ADVANCE TO KNOCKOUTS (6 WINNERS + 2 BEST LOSERS TO QF)</div>
       </div>
       <div class="table-wrap">
         <table class="standings-table">
@@ -146,7 +145,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // Fallback score extractor for column shifts
   function extractScores(match) {
     let hScore = match.home_score;
     let aScore = match.away_score;
@@ -167,7 +165,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return { hScore, aScore };
   }
 
-  function fxCard(match, isKnockout, isBronze = false){
+  function fxCard(match, isKnockout, isBronze = false, matchLabel = null){
     const { hScore, aScore } = extractScores(match);
     const hasScore = hScore !== "" && hScore !== undefined && hScore !== null &&
                      aScore !== "" && aScore !== undefined && aScore !== null;
@@ -179,8 +177,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       midHtml = `<span class="vs" style="font-size: 14px; ${isBronze ? 'color:var(--bronze)':''}">VS</span>`;
     }
     
+    const badgeHtml = matchLabel ? `<div class="match-badge">${matchLabel}</div>` : '';
+
     return `
       <div class="fx ${isKnockout ? 'knockout':''} ${isBronze ? 'bronze-fx':''}">
+        ${badgeHtml}
         <div class="side home">
           <div class="tname">${match.home_team}</div>
         </div>
@@ -193,7 +194,8 @@ document.addEventListener("DOMContentLoaded", async () => {
       </div>`;
   }
 
-  function renderMatchView(stageId, title, subtitle, isKnockout) {
+  // prefix ပါ ထည့်သွင်းနိုင်ရန် ပြင်ဆင်ထားသည် (ဥပမာ - M သို့မဟုတ် QM)
+  function renderMatchView(stageId, title, subtitle, isKnockout, showMatchNumber = false, prefix = "M") {
     const matches = getMatches(stageId);
     if(matches.length === 0) {
       return `
@@ -206,7 +208,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="stagesub">${subtitle}</div>
       </div>
       <div class="fixtures-grid">
-        ${matches.map(m => fxCard(m, isKnockout)).join("")}
+        ${matches.map((m, i) => {
+          const matchLabel = showMatchNumber ? `${prefix} ${i + 1}` : null;
+          return fxCard(m, isKnockout, false, matchLabel);
+        }).join("")}
       </div>
     `;
   }
@@ -226,7 +231,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="finals-container">
     `;
 
-    // 1. Grand Final Block
     if (fM) {
       const { hScore, aScore } = extractScores(fM);
       const hasFScore = hScore !== "" && hScore !== undefined && hScore !== null && aScore !== "" && aScore !== undefined && aScore !== null;
@@ -253,7 +257,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
     }
 
-    // 2. 3rd Place Play-off Block
     if (tM) {
       const { hScore, aScore } = extractScores(tM);
       const hasTScore = hScore !== "" && hScore !== undefined && hScore !== null && aScore !== "" && aScore !== undefined && aScore !== null;
@@ -296,8 +299,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     wk3: () => renderMatchView('wk3', "Week 3", "MATCH 2 · H TO H", false),
     wk4: () => renderMatchView('wk4', "Week 4", "MATCH 3 · H TO H", false),
     wk5: () => renderMatchView('wk5', "Week 5", "MATCH 4 · H TO H", false),
-    r16: () => renderMatchView('r16', "Round of 16", "WEEK 6 · TOP 16 KNOCKOUT", true),
-    qf: () => renderMatchView('qf', "Quarter-Final", "WEEK 7 · 8 TEAMS", true),
+    
+    // Knockout Round (12 Teams) -> M 1 to M 6
+    r16: () => renderMatchView('r16', "Round of 16", "TOP 12 KNOCKOUT PLAY-OFF", true, true, "M"),
+    
+    // Quarter-Final -> QM 1 to QM 4 (ပြောင်းလဲထားသော prefix "QM")
+    qf: () => renderMatchView('qf', "Quarter-Final", "8 TEAMS (6 WINNERS + 2 BEST LOSERS)", true, true, "QM"),
+    
     sf: () => renderMatchView('sf', "Semi-Final", "WEEK 8 · 4 TEAMS", true),
     final: renderFinalView
   };
