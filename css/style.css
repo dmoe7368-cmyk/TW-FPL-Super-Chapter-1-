@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Design Tokens & System Variables
+   Design Tokens & System Variables (Material 3 & Sports UI Standards)
    ========================================================================== */
 :root {
   --void: #0b0616;
@@ -44,13 +44,15 @@ header::before { content: ""; position: absolute; inset: 0; background-image: re
 h1 { font-family: var(--font-heading); font-weight: 400; font-size: clamp(30px, 8vw, 48px); letter-spacing: 1px; line-height: 1.05; margin-top: 8px; background: linear-gradient(180deg, #ffffff 20%, #c9b8ec 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .season { display: inline-block; margin-top: 12px; font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--void); background: var(--gold); padding: 4px 14px; border-radius: var(--radius-sm); letter-spacing: 2px; box-shadow: 0 2px 10px var(--gold-glow); }
 
-nav { display: flex; overflow-x: auto; gap: 8px; padding: 16px; max-width: 900px; margin: 0 auto; scrollbar-width: none; }
+nav { display: flex; overflow-x: auto; gap: 8px; padding: 16px; max-width: 1000px; margin: 0 auto; scrollbar-width: none; }
 nav::-webkit-scrollbar { display: none; }
 .navgroup { display: flex; gap: 8px; padding-right: 12px; border-right: 1px solid var(--line); }
 .navgroup:last-child { border-right: none; padding-right: 0; }
 .tab { flex: 0 0 auto; font-family: var(--font-mono); font-size: 12px; letter-spacing: 1px; color: var(--text-dim); background: var(--panel); border: 1px solid var(--line); padding: 10px 16px; border-radius: var(--radius-sm); cursor: pointer; white-space: nowrap; transition: all 0.2s ease-in-out; }
 .tab:hover { color: var(--text); border-color: var(--gold-dim); background: var(--panel-hover); }
 .tab.active { background: var(--gold); border-color: var(--gold); color: #1a1000; font-weight: 700; box-shadow: 0 4px 14px var(--gold-glow); }
+.tab.info-tab { background: rgba(138, 79, 224, 0.2); border-color: var(--purple); color: #d8b4fe; }
+.tab.info-tab.active { background: var(--purple); color: #fff; }
 
 main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .stagehead { display: flex; align-items: baseline; justify-content: space-between; padding: 24px 4px 12px; border-bottom: 1px dashed var(--line); margin-bottom: 20px; }
@@ -66,38 +68,27 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .qualify-row { border-left: 4px solid var(--gold); }
 .out-row { opacity: 0.75; }
 .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: var(--panel-2); font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
-.qualify-row .rank-badge { background: var(--gold-glow); color: var(--gold); }
+.qualify-row .rank-badge { background: rgba(231,185,63,0.15); color: var(--gold); }
 .status-tag { font-size: 11px; font-family: var(--font-mono); padding: 4px 8px; border-radius: 6px; background: var(--panel-2); color: var(--text-dim); }
-.tag-q { background: rgba(53, 196, 106, 0.15); color: #7ee6a5; font-weight: 700; }
+.tag-q { background: rgba(53,196,106,0.15); color: #7ee6a5; font-weight: 700; }
 
 .fixtures-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
 @media (min-width: 640px) { .fixtures-grid { grid-template-columns: 1fr 1fr; } }
 .fx { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; box-shadow: var(--shadow-card); }
 .fx::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--pitch); }
 .fx.knockout::before { background: var(--gold); }
-.fx.bronze-fx::before { background: var(--bronze); }
-
-/* Match Badge Style */
-.match-badge {
-  position: absolute;
-  top: 0;
-  left: 4px;
-  background: var(--panel-2);
-  color: var(--gold);
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-bottom-right-radius: 6px;
-  border-right: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
-  z-index: 1;
-}
+.match-badge { position: absolute; top: 0; left: 4px; background: var(--panel-2); color: var(--gold); font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-bottom-right-radius: 6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); z-index: 1; }
 
 .fx .side { flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .fx .side.away { text-align: right; align-items: flex-end; }
 .fx .tname { font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fx .mid { font-family: var(--font-mono); font-size: 13px; color: var(--gold); font-weight: 700; text-align: center; }
+
+.tie-break-info { background: rgba(231, 185, 63, 0.08); border: 1px dashed var(--gold-dim); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; color: var(--gold); margin-top: 6px; text-align: center; }
+
+.poster-container { text-align: center; padding: 10px 0; }
+.poster-img { width: 100%; max-width: 500px; border-radius: var(--radius-md); border: 2px solid var(--line); box-shadow: var(--shadow-card); margin-bottom: 20px; transition: transform 0.2s ease; }
+.poster-img:hover { transform: scale(1.01); border-color: var(--gold); }
 
 .finals-container { display: flex; flex-direction: column; gap: 24px; margin-top: 8px; }
 .final-card-section { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 20px 16px; box-shadow: var(--shadow-card); }
@@ -116,5 +107,6 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .trophy-slot .cup { font-size: 32px; }
 .trophy-slot .champ { font-family: var(--font-heading); font-size: 16px; color: var(--gold); margin-top: 4px; letter-spacing: 1px; }
 .trophy-slot .champ.bronze-champ { color: var(--bronze); }
+
 footer { text-align: center; padding: 32px 16px 12px; font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); letter-spacing: 1px; }
 footer span { color: var(--gold); }
