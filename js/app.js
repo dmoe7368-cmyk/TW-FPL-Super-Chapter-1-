@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   mainContainer.innerHTML = `
     <div style="text-align:center; padding:50px; color:var(--gold); font-family:'JetBrains Mono', monospace;">
-      Fetching & Calculating TW FPL Data...
+      Fetching 24 Teams TW FPL Data & Tie-Breaker Engine...
     </div>`;
 
   const standingsResponse = await fetchCSV(CONFIG.STANDINGS_CSV_URL, "Standings Sheet");
@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const matchesData = matchesResponse.data;
 
-  // Auto-calculation for League Phase
+  // Auto-calculation for League Phase (Week 2 to 5)
   matchesData.forEach(match => {
     const stage = match.stage ? match.stage.toString().trim().toLowerCase() : "";
     if (stage.startsWith('wk')) {
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           homeTeam.mp += 1;
           awayTeam.mp += 1;
           homeTeam.fpl_pts += hPts;
-          homeTeam.fpl_pts += aPts;
+          awayTeam.fpl_pts += aPts;
 
           if (hPts > aPts) {
             homeTeam.w += 1;
@@ -76,6 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
+  // Tie-breaker: Pts -> FPL Pts
   const sortedStandings = [...validStandings].sort((a, b) => {
     if (b.pts !== a.pts) return (b.pts || 0) - (a.pts || 0);
     return (b.fpl_pts || 0) - (a.fpl_pts || 0);
@@ -88,7 +89,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   };
 
-  // Render Standings (Top 12 Only - No OUT tags for ranks 13+)
+  // Render Standings (Top 16 Advance)
   function renderStandings() {
     if (sortedStandings.length === 0) {
       return `
@@ -100,13 +101,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let rowsHtml = sortedStandings.map((team, i) => {
       const rank = i + 1;
-      const isQualifying = rank <= 12; // ထိပ်ဆုံး ၁၂ သင်းသာ Qualified ဖြစ်သည်
+      const isQualifying = rank <= 16;
       const rowClass = isQualifying ? 'qualify-row' : 'out-row';
-      
-      // Top 12 အတွက်သာ TOP 12 တက်ဂ်ပြမည်၊ ကျန်အသင်းများအတွက် Status ကွက်လပ်ထားမည်
-      const statusTag = isQualifying 
-        ? '<span class="status-tag tag-q">TOP 12</span>' 
-        : ''; 
+      const statusTag = isQualifying ? '<span class="status-tag tag-q">TOP 16</span>' : '';
 
       return `
         <tr class="${rowClass}">
@@ -126,7 +123,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `
       <div class="stagehead">
         <h2>League Phase Standings</h2>
-        <div class="stagesub">TOP 12 ADVANCE TO KNOCKOUTS (6 WINNERS + 2 BEST LOSERS TO QF)</div>
+        <div class="stagesub">24 TEAMS · TOP 16 ADVANCE TO ROUND OF 16 (8 MATCHES)</div>
       </div>
       <div class="table-wrap">
         <table class="standings-table">
@@ -157,7 +154,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         (aScore === "" || aScore === undefined || aScore === null)) {
       const keys = Object.keys(match);
       const numericVals = keys
-        .filter(k => k !== 'stage' && k !== 'home_team' && k !== 'away_team')
+        .filter(k => !['stage', 'home_team', 'away_team', 'home_cap', 'away_cap', 'home_vc', 'away_vc', 'home_gk', 'away_gk', 'home_prev', 'away_prev'].includes(k))
         .map(k => match[k])
         .filter(v => v !== "" && v !== undefined && v !== null && !isNaN(Number(v)));
       
@@ -169,14 +166,60 @@ document.addEventListener("DOMContentLoaded", async () => {
     return { hScore, aScore };
   }
 
+  // Knockout Tie-Breaker Logic Evaluator
+  function evaluateKnockoutWinner(match) {
+    const { hScore, aScore } = extractScores(match);
+    if (hScore === "" || hScore === undefined || hScore === null || aScore === "" || aScore === undefined || aScore === null) {
+      return { winner: null, method: null };
+    }
+
+    const hNum = Number(hScore);
+    const aNum = Number(aScore);
+
+    if (hNum > aNum) return { winner: match.home_team, method: 'Score' };
+    if (aNum > hNum) return { winner: match.away_team, method: 'Score' };
+
+    // --- TIE-BREAKER SEQUENCE ---
+    const hCap = Number(match.home_cap || 0);
+    const aCap = Number(match.away_cap || 0);
+    if (hCap > aCap) return { winner: match.home_team, method: 'Captain Pts' };
+    if (aCap > hCap) return { winner: match.away_team, method: 'Captain Pts' };
+
+    const hVc = Number(match.home_vc || 0);
+    const aVc = Number(match.away_vc || 0);
+    if (hVc > aVc) return { winner: match.home_team, method: 'Vice-Captain Pts' };
+    if (aVc > hVc) return { winner: match.away_team, method: 'Vice-Captain Pts' };
+
+    const hGk = Number(match.home_gk || 0);
+    const aGk = Number(match.away_gk || 0);
+    if (hGk > aGk) return { winner: match.home_team, method: 'Goalkeeper Pts' };
+    if (aGk > hGk) return { winner: match.away_team, method: 'Goalkeeper Pts' };
+
+    const hPrev = Number(match.home_prev || 0);
+    const aPrev = Number(match.away_prev || 0);
+    if (hPrev > aPrev) return { winner: match.home_team, method: 'Previous GW Pts' };
+    if (aPrev > hPrev) return { winner: match.away_team, method: 'Previous GW Pts' };
+
+    return { winner: 'Tie / Shared', method: 'All tie-breakers equal' };
+  }
+
   function fxCard(match, isKnockout, isBronze = false, matchLabel = null){
     const { hScore, aScore } = extractScores(match);
     const hasScore = hScore !== "" && hScore !== undefined && hScore !== null &&
                      aScore !== "" && aScore !== undefined && aScore !== null;
 
     let midHtml = '';
+    let tieBreakNote = '';
+
     if (hasScore) {
       midHtml = `<span class="vs">${hScore}</span> <span style="color:var(--text-dim); margin: 0 4px;">-</span> <span class="vs">${aScore}</span>`;
+      
+      if (isKnockout && Number(hScore) === Number(aScore)) {
+        const evaluation = evaluateKnockoutWinner(match);
+        if (evaluation.winner) {
+          tieBreakNote = `<div class="tie-break-info">⚖️ Tie-Breaker: <strong>${evaluation.method}</strong> ➔ Winner: <strong>${evaluation.winner}</strong></div>`;
+        }
+      }
     } else {
       midHtml = `<span class="vs" style="font-size: 14px; ${isBronze ? 'color:var(--bronze)':''}">VS</span>`;
     }
@@ -195,7 +238,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="side away">
           <div class="tname">${match.away_team || 'TBD'}</div>
         </div>
-      </div>`;
+      </div>
+      ${tieBreakNote}
+    `;
   }
 
   function renderMatchView(stageId, title, subtitle, isKnockout, showMatchNumber = false, prefix = "M") {
@@ -239,8 +284,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const hasFScore = hScore !== "" && hScore !== undefined && hScore !== null && aScore !== "" && aScore !== undefined && aScore !== null;
       const displayH = hasFScore ? hScore : '-';
       const displayA = hasFScore ? aScore : '-';
-      const homeWin = hasFScore && Number(hScore) > Number(aScore);
-      const awayWin = hasFScore && Number(aScore) > Number(hScore);
+      
+      const evalFinal = evaluateKnockoutWinner(fM);
+      const homeWin = hasFScore && (Number(hScore) > Number(aScore) || evalFinal.winner === fM.home_team);
+      const awayWin = hasFScore && (Number(aScore) > Number(hScore) || evalFinal.winner === fM.away_team);
 
       html += `
         <section class="final-card-section grand-final">
@@ -251,7 +298,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
           <div class="trophy-slot">
             <div class="cup">🏆</div>
-            <div class="champ">CHAMPION — 80K</div>
+            <div class="champ">CHAMPION — 60K</div>
           </div>
           <div style="margin-top:14px;">
             ${fxCard(fM, true, false)}
@@ -265,8 +312,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       const hasTScore = hScore !== "" && hScore !== undefined && hScore !== null && aScore !== "" && aScore !== undefined && aScore !== null;
       const displayH = hasTScore ? hScore : '-';
       const displayA = hasTScore ? aScore : '-';
-      const homeWin = hasTScore && Number(hScore) > Number(aScore);
-      const awayWin = hasTScore && Number(aScore) > Number(hScore);
+
+      const evalThird = evaluateKnockoutWinner(tM);
+      const homeWin = hasTScore && (Number(hScore) > Number(aScore) || evalThird.winner === tM.home_team);
+      const awayWin = hasTScore && (Number(aScore) > Number(hScore) || evalThird.winner === tM.away_team);
 
       html += `
         <section class="final-card-section third-place">
@@ -277,7 +326,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           </div>
           <div class="trophy-slot">
             <div class="cup">🥉</div>
-            <div class="champ bronze-champ">3RD PLACE — 30K</div>
+            <div class="champ bronze-champ">3RD PLACE — 20K</div>
           </div>
           <div style="margin-top:14px;">
             ${fxCard(tM, false, true)}
@@ -295,6 +344,32 @@ document.addEventListener("DOMContentLoaded", async () => {
     return html;
   }
 
+  function renderPostersView() {
+    return `
+      <div class="stagehead">
+        <h2>Teams Posters</h2>
+        <div class="stagesub">24 TEAMS OFFICIAL CRESTS & LINEUP</div>
+      </div>
+      <div class="poster-container">
+        <p style="color:var(--text-dim); font-family:'JetBrains Mono', monospace; font-size:13px; margin-bottom:16px;">TW FPL Super Chapter 1 Official 24 Teams Grid Poster</p>
+        <img src="images/team-posters.png" alt="Teams Posters" class="poster-img">
+      </div>
+    `;
+  }
+
+  function renderRulesView() {
+    return `
+      <div class="stagehead">
+        <h2>Tournament Rules & Plan</h2>
+        <div class="stagesub">OFFICIAL GUIDELINES & PRIZE POOL</div>
+      </div>
+      <div class="poster-container">
+        <p style="color:var(--text-dim); font-family:'JetBrains Mono', monospace; font-size:13px; margin-bottom:16px;">TW FPL Super Chapter 1 Rules & Tournament Info Infographic</p>
+        <img src="images/tournament-rules.png" alt="Tournament Rules" class="poster-img">
+      </div>
+    `;
+  }
+
   // Tab View Mapping
   const views = {
     standings: renderStandings,
@@ -302,15 +377,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     wk3: () => renderMatchView('wk3', "Week 3", "MATCH 2 · H TO H", false),
     wk4: () => renderMatchView('wk4', "Week 4", "MATCH 3 · H TO H", false),
     wk5: () => renderMatchView('wk5', "Week 5", "MATCH 4 · H TO H", false),
-    r16: () => renderMatchView('r16', "Round of 16", "TOP 12 KNOCKOUT PLAY-OFF", true, true, "M"),
-    qf: () => renderMatchView('qf', "Quarter-Final", "8 TEAMS (6 WINNERS + 2 BEST LOSERS)", true, true, "QM"),
+    
+    // Round of 16 (8 Matches) - Top 16 teams with M 1 to M 8 labels
+    r16: () => renderMatchView('r16', "Round of 16", "TOP 16 KNOCKOUT (8 MATCHES)", true, true, "M"),
+    
+    qf: () => renderMatchView('qf', "Quarter-Final", "8 TEAMS (4 MATCHES)", true, true, "QM"),
     sf: () => renderMatchView('sf', "Semi-Final", "WEEK 8 · 4 TEAMS", true),
-    final: renderFinalView
+    final: renderFinalView,
+    
+    posters: renderPostersView,
+    rules: renderRulesView
   };
 
-  function setView(name){
+  // Fixed Syntax Error: ensure space between function and setView name
+  function setView(name) {
     mainContainer.innerHTML = views[name]();
-    document.querySelectorAll('.tab').forEach(t => {
+    document.querySelectorAll('.tab').spaces = document.querySelectorAll('.tab').forEach(t => {
       t.classList.toggle('active', t.dataset.view === name);
     });
   }
