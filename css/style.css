@@ -14,6 +14,8 @@
   --bronze: #cd7f32;
   --pitch: #35c46a;
   --purple: #8a4fe0;
+  --success: #22c55e; /* Win color */
+  --danger: #ef4444;  /* Lose color */
   --text: #ece6fb;
   --text-dim: #a091c4;
   --font-heading: 'Anton', sans-serif;
@@ -62,6 +64,14 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 8px; margin-bottom: 24px; box-shadow: var(--shadow-card); }
 .standings-table { width: 100%; min-width: 580px; border-collapse: collapse; text-align: left; font-size: 15px; }
 .standings-table th { padding: 14px 12px; border-bottom: 1px solid var(--line); color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
+
+/* Table Column Header Color Highlights (Sports UI Standard) */
+.standings-table th:nth-child(4) { color: var(--success); } /* W - Win (Green) */
+.standings-table th:nth-child(5) { color: var(--text-dim); } /* D - Draw (Gray) */
+.standings-table th:nth-child(6) { color: var(--danger); }  /* L - Lose (Red) */
+.standings-table th:nth-child(7) { color: var(--gold); }   /* FPL Pts (Gold) */
+.standings-table th:nth-child(8) { color: #ffffff; font-weight: 700; } /* Pts (White/Bold) */
+
 .standings-table td { padding: 12px; border-bottom: 1px dashed var(--line); color: var(--text); }
 .standings-table tbody tr { transition: background 0.15s ease; }
 .standings-table tbody tr:hover { background: var(--line-light); }
@@ -70,7 +80,7 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: var(--panel-2); font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
 .qualify-row .rank-badge { background: rgba(231,185,63,0.15); color: var(--gold); }
 .status-tag { font-size: 11px; font-family: var(--font-mono); padding: 4px 8px; border-radius: 6px; background: var(--panel-2); color: var(--text-dim); }
-.tag-q { background: rgba(53,196,106,0.15); color: #7ee6a5; font-weight: 700; }
+.tag-q { background: rgba(53, 196, 106, 0.15); color: #7ee6a5; font-weight: 700; }
 
 .fixtures-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
 @media (min-width: 640px) { .fixtures-grid { grid-template-columns: 1fr 1fr; } }
@@ -97,7 +107,7 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .round-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; color: var(--gold); text-align: center; text-transform: uppercase; margin-bottom: 14px; }
 .round-label.bronze-label { color: var(--bronze); }
 .bmatch { background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; max-width: 440px; margin: 0 auto; }
-.bmatch .brow { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--line); }
+.bmatch .brow { display: justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--line); display: flex; }
 .bmatch .brow:last-child { border-bottom: none; }
 .bmatch .brow.winner { background: rgba(53, 196, 106, 0.12); }
 .bmatch .brow.winner .bname { color: #7ee6a5; font-weight: 700; }
