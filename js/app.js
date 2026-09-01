@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   mainContainer.innerHTML = `
     <div style="text-align:center; padding:50px; color:var(--gold); font-family:'JetBrains Mono', monospace;">
-      Fetching 24 Teams TW FPL Data & Tie-Breaker Engine...
+      Fetching 24 Teams TW FPL Data & Engine...
     </div>`;
 
   const standingsResponse = await fetchCSV(CONFIG.STANDINGS_CSV_URL, "Standings Sheet");
@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
           homeTeam.mp += 1;
           awayTeam.mp += 1;
           homeTeam.fpl_pts += hPts;
-          awayTeam.fpl_pts += aPts;
+          homeTeam.fpl_pts += aPts;
 
           if (hPts > aPts) {
             homeTeam.w += 1;
@@ -210,15 +210,25 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     let midHtml = '';
     let tieBreakNote = '';
+    let homeWin = false;
+    let awayWin = false;
 
     if (hasScore) {
       midHtml = `<span class="vs">${hScore}</span> <span style="color:var(--text-dim); margin: 0 4px;">-</span> <span class="vs">${aScore}</span>`;
       
-      if (isKnockout && Number(hScore) === Number(aScore)) {
-        const evaluation = evaluateKnockoutWinner(match);
-        if (evaluation.winner) {
-          tieBreakNote = `<div class="tie-break-info">⚖️ Tie-Breaker: <strong>${evaluation.method}</strong> ➔ Winner: <strong>${evaluation.winner}</strong></div>`;
+      const hNum = Number(hScore);
+      const aNum = Number(aScore);
+
+      if (isKnockout) {
+        const evalWin = evaluateKnockoutWinner(match);
+        homeWin = evalWin.winner === match.home_team;
+        awayWin = evalWin.winner === match.away_team;
+        if (hNum === aNum && evalWin.winner) {
+          tieBreakNote = `<div class="tie-break-info">⚖️ Tie-Breaker: <strong>${evalWin.method}</strong> ➔ Winner: <strong>${evalWin.winner}</strong></div>`;
         }
+      } else {
+        homeWin = hNum > aNum;
+        awayWin = aNum > hNum;
       }
     } else {
       midHtml = `<span class="vs" style="font-size: 14px; ${isBronze ? 'color:var(--bronze)':''}">VS</span>`;
@@ -229,13 +239,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     return `
       <div class="fx ${isKnockout ? 'knockout':''} ${isBronze ? 'bronze-fx':''}">
         ${badgeHtml}
-        <div class="side home">
+        <div class="side home ${homeWin ? 'winner' : ''}">
           <div class="tname">${match.home_team}</div>
         </div>
         <div class="mid" style="flex: 0 0 auto; min-width: 60px; white-space: nowrap; text-align: center;">
           ${midHtml}
         </div>
-        <div class="side away">
+        <div class="side away ${awayWin ? 'winner' : ''}">
           <div class="tname">${match.away_team || 'TBD'}</div>
         </div>
       </div>
@@ -377,22 +387,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     wk3: () => renderMatchView('wk3', "Week 3", "MATCH 2 · H TO H", false),
     wk4: () => renderMatchView('wk4', "Week 4", "MATCH 3 · H TO H", false),
     wk5: () => renderMatchView('wk5', "Week 5", "MATCH 4 · H TO H", false),
-    
-    // Round of 16 (8 Matches) - Top 16 teams with M 1 to M 8 labels
     r16: () => renderMatchView('r16', "Round of 16", "TOP 16 KNOCKOUT (8 MATCHES)", true, true, "M"),
-    
     qf: () => renderMatchView('qf', "Quarter-Final", "8 TEAMS (4 MATCHES)", true, true, "QM"),
     sf: () => renderMatchView('sf', "Semi-Final", "WEEK 8 · 4 TEAMS", true),
     final: renderFinalView,
-    
     posters: renderPostersView,
     rules: renderRulesView
   };
 
-  // Fixed Syntax Error: ensure space between function and setView name
   function setView(name) {
     mainContainer.innerHTML = views[name]();
-    document.querySelectorAll('.tab').spaces = document.querySelectorAll('.tab').forEach(t => {
+    document.querySelectorAll('.tab').forEach(t => {
       t.classList.toggle('active', t.dataset.view === name);
     });
   }
