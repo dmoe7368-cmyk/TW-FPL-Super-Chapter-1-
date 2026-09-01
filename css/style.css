@@ -14,8 +14,8 @@
   --bronze: #cd7f32;
   --pitch: #35c46a;
   --purple: #8a4fe0;
-  --success: #22c55e; /* Win color */
-  --danger: #ef4444;  /* Lose color */
+  --success: #22c55e;
+  --danger: #ef4444;
   --text: #ece6fb;
   --text-dim: #a091c4;
   --font-heading: 'Anton', sans-serif;
@@ -65,12 +65,11 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .standings-table { width: 100%; min-width: 580px; border-collapse: collapse; text-align: left; font-size: 15px; }
 .standings-table th { padding: 14px 12px; border-bottom: 1px solid var(--line); color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; }
 
-/* Table Column Header Color Highlights (Sports UI Standard) */
-.standings-table th:nth-child(4) { color: var(--success); } /* W - Win (Green) */
-.standings-table th:nth-child(5) { color: var(--text-dim); } /* D - Draw (Gray) */
-.standings-table th:nth-child(6) { color: var(--danger); }  /* L - Lose (Red) */
-.standings-table th:nth-child(7) { color: var(--gold); }   /* FPL Pts (Gold) */
-.standings-table th:nth-child(8) { color: #ffffff; font-weight: 700; } /* Pts (White/Bold) */
+.standings-table th:nth-child(4) { color: var(--success); }
+.standings-table th:nth-child(5) { color: var(--text-dim); }
+.standings-table th:nth-child(6) { color: var(--danger); }
+.standings-table th:nth-child(7) { color: var(--gold); }
+.standings-table th:nth-child(8) { color: #ffffff; font-weight: 700; }
 
 .standings-table td { padding: 12px; border-bottom: 1px dashed var(--line); color: var(--text); }
 .standings-table tbody tr { transition: background 0.15s ease; }
@@ -80,19 +79,65 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .rank-badge { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 6px; background: var(--panel-2); font-family: var(--font-mono); font-size: 12px; font-weight: 700; }
 .qualify-row .rank-badge { background: rgba(231,185,63,0.15); color: var(--gold); }
 .status-tag { font-size: 11px; font-family: var(--font-mono); padding: 4px 8px; border-radius: 6px; background: var(--panel-2); color: var(--text-dim); }
-.tag-q { background: rgba(53, 196, 106, 0.15); color: #7ee6a5; font-weight: 700; }
+.tag-q { background: rgba(53,196,106,0.15); color: #7ee6a5; font-weight: 700; }
 
+/* ==========================================================================
+   Fixture Card Styles (Fixed overlapping bug for long team names)
+   ========================================================================== */
 .fixtures-grid { display: grid; grid-template-columns: 1fr; gap: 12px; margin-bottom: 24px; }
 @media (min-width: 640px) { .fixtures-grid { grid-template-columns: 1fr 1fr; } }
-.fx { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; display: flex; align-items: center; gap: 12px; position: relative; overflow: hidden; box-shadow: var(--shadow-card); }
+
+.fx { 
+  background: var(--panel); 
+  border: 1px solid var(--line); 
+  border-radius: var(--radius-md); 
+  padding: 16px; 
+  display: flex; 
+  align-items: center; 
+  gap: 12px; 
+  position: relative; 
+  overflow: hidden; 
+  box-shadow: var(--shadow-card); 
+}
 .fx::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--pitch); }
 .fx.knockout::before { background: var(--gold); }
 .match-badge { position: absolute; top: 0; left: 4px; background: var(--panel-2); color: var(--gold); font-family: var(--font-mono); font-size: 10px; font-weight: 700; padding: 2px 8px; border-bottom-right-radius: 6px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); z-index: 1; }
 
-.fx .side { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+/* Flex rules to prevent long names from covering the scores */
+.fx .side { 
+  flex: 1; 
+  min-width: 0; /* Crucial for text-overflow ellipsis to work inside flex */
+  display: flex; 
+  flex-direction: column; 
+  padding: 4px 8px; 
+  border-radius: 6px; 
+  transition: background 0.2s; 
+}
 .fx .side.away { text-align: right; align-items: flex-end; }
-.fx .tname { font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fx .mid { font-family: var(--font-mono); font-size: 13px; color: var(--gold); font-weight: 700; text-align: center; }
+.fx .side.winner { background: rgba(34, 197, 94, 0.12); }
+.fx .side.winner .tname { color: #7ee6a5; font-weight: 700; }
+
+.fx .tname { 
+  font-weight: 600; 
+  font-size: 15px; 
+  color: var(--text); 
+  white-space: nowrap; 
+  overflow: hidden; 
+  text-overflow: ellipsis; /* Long names will safely truncate with '...' */
+  width: 100%;
+}
+
+/* Center score container with fixed minimum width so it never gets squeezed */
+.fx .mid { 
+  flex: 0 0 90px; /* Fixed width for score area */
+  min-width: 90px;
+  font-family: var(--font-mono); 
+  font-size: 13px; 
+  color: var(--gold); 
+  font-weight: 700; 
+  text-align: center; 
+  white-space: nowrap; 
+}
 
 .tie-break-info { background: rgba(231, 185, 63, 0.08); border: 1px dashed var(--gold-dim); border-radius: var(--radius-sm); padding: 8px 12px; font-family: var(--font-mono); font-size: 11px; color: var(--gold); margin-top: 6px; text-align: center; }
 
@@ -107,7 +152,7 @@ main { max-width: 900px; margin: 0 auto; padding: 0 16px; }
 .round-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; color: var(--gold); text-align: center; text-transform: uppercase; margin-bottom: 14px; }
 .round-label.bronze-label { color: var(--bronze); }
 .bmatch { background: var(--panel-2); border: 1px solid var(--line); border-radius: var(--radius-sm); overflow: hidden; max-width: 440px; margin: 0 auto; }
-.bmatch .brow { display: justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--line); display: flex; }
+.bmatch .brow { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; font-size: 14px; border-bottom: 1px solid var(--line); }
 .bmatch .brow:last-child { border-bottom: none; }
 .bmatch .brow.winner { background: rgba(53, 196, 106, 0.12); }
 .bmatch .brow.winner .bname { color: #7ee6a5; font-weight: 700; }
